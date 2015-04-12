@@ -10,6 +10,7 @@ import de.micromata.opengis.kml.v_2_2_0.LinearRing;
 import de.micromata.opengis.kml.v_2_2_0.Placemark;
 import de.micromata.opengis.kml.v_2_2_0.Polygon;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -18,21 +19,21 @@ import java.util.List;
 */
 public class KMLParser{
     //Java class that supposedly converts kml files into latitude, longitude, and altitude (prints them)
-    public void parseKml(String inputFileLocation) {
+    public List<CoordTriple> parseKml(String inputFileLocation) {
         String src = inputFileLocation;
         InputStream is = getClass().getClassLoader().getResourceAsStream(src);
         Kml kml = Kml.unmarshal(is);
         Feature feature = kml.getFeature();
-        parseFeature(feature);
+        return parseFeature(feature);
     }
     
-    public void parseKml(InputStream resource){
+    public List<CoordTriple> parseKml(InputStream resource){
         Kml kml = Kml.unmarshal(resource);
         Feature feature = kml.getFeature();
-        parseFeature(feature);
+        return parseFeature(feature);
     }
 
-    private void parseFeature(Feature feature) {
+    private List<CoordTriple> parseFeature(Feature feature) {
         if(feature != null) {
             if(feature instanceof Document) {
                 Document document = (Document) feature;
@@ -41,14 +42,17 @@ public class KMLParser{
                     if(documentFeature instanceof Placemark) {
                         Placemark placemark = (Placemark) documentFeature;
                         Geometry geometry = placemark.getGeometry();
-                        parseGeometry(geometry);
+                        //obviously this will only get the first oen currently, which needs fixing. 
+                        return parseGeometry(geometry);
                     }
                 }
             }
         }
+        return null;
     }
 
-    private void parseGeometry(Geometry geometry) {
+    private List<CoordTriple> parseGeometry(Geometry geometry) {
+        List<CoordTriple> coordList = new ArrayList<>();
         if(geometry != null) {
             if(geometry instanceof Polygon) {
                 Polygon polygon = (Polygon) geometry;
@@ -59,21 +63,15 @@ public class KMLParser{
                         List<Coordinate> coordinates = linearRing.getCoordinates();
                         if(coordinates != null) {
                             for(Coordinate coordinate : coordinates) {
-                                parseCoordinate(coordinate);
+                               coordList.add(new CoordTriple(coordinate.getLatitude(), coordinate.getLongitude(), coordinate.getAltitude()));
                             }
                         }
                     }
                 }
             }
         }
+        return coordList;
     }
 
-    private void parseCoordinate(Coordinate coordinate) {
-        if(coordinate != null) {
-            System.out.println("Longitude: " +  coordinate.getLongitude());
-            System.out.println("Latitude : " +  coordinate.getLatitude());
-            System.out.println("Altitude : " +  coordinate.getAltitude());
-            System.out.println("");
-        }
-    }
+   
 }
