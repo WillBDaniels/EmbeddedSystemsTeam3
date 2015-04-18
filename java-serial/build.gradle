@@ -1,0 +1,58 @@
+
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'maven'
+
+def mainAppName = "Java_serial"
+def versionNumber = "1.0"
+
+test {
+    useJUnit()
+    //forkEvery = 1
+}
+
+dependencies {
+    compile fileTree(dir: 'lib', includes: ['*.jar']) 
+    testCompile 'junit:junit:4.11'
+    compile 'org.rxtx:rxtx:2.1.7'
+
+}
+repositories {
+   mavenCentral()
+}
+task wrapper(type: Wrapper){
+    gradleVersion = '2.3'
+}
+
+jar{
+    configurations.compile.collect { it.isDirectory() ? it: zipTree(it)}
+    //    //This is sort of a hack, but whatever, it works. This makes it so we don't
+    //    //get a 'duplicate entry' warning screaming bloody murder at us when we try to
+    //    //make the fat jar.
+    from(configurations.compile) { 
+    }
+	manifest{
+		attributes 'Main-Class': 'edu.csci.team3.Main'
+	}
+}
+
+task docs(type:Exec) {
+    ext {
+        outputDir = file('build/docs')
+    }
+    if (System.getenv("PATH").toLowerCase().contains("doxygen")){
+        commandLine 'doxygen'
+        inputs.file file("Doxyfile");
+        inputs.files sourceSets.main.java, sourceSets.test.java
+        outputs.dir outputDir
+    }else{
+        System.out.println("I'm sorry, you need doxygen installed to run the program, \n"
+            + "please visit http://www.stack.nl/~dimitri/doxygen/download.html\n"
+            + "to download the lastest version of doxygen. ");
+    }
+}
+
+
+
+task all (dependsOn: [build])
