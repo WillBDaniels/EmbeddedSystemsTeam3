@@ -1,0 +1,2 @@
+Please install psyco for better video decoding performance.
+Unable to bind video decoding methods with psyco. Proceeding anyways, but video decoding will be slow!

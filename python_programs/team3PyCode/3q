@@ -1,0 +1,159 @@
+#!/usr/bin/python
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+#|R|a|s|p|b|e|r|r|y|P|i|-|S|p|y|.|c|o|.|u|k|
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+#
+# ultrasonic_1.py
+# Measure distance using an ultrasonic module
+#
+# Author : Matt Hawkins
+# Date   : 09/01/2013
+
+# Import required Python libraries
+import time
+import RPi.GPIO as GPIO
+
+import libardrone
+
+# Use BCM GPIO references
+# instead of physical pin numbers
+GPIO.setmode(GPIO.BCM)
+
+# Define GPIO to use on Pi
+GPIO_TRIGGER_FRONT = 17
+GPIO_ECHO_FRONT = 18
+GPIO_TRIGGER_RIGHT = 22
+GPIO_ECHO_RIGHT = 23
+GPIO_TRIGGER_LEFT = 6
+GPIO_ECHO_LEFT = 12
+
+print "Ultrasonic Measurement"
+
+
+def main():
+    print "In the main method" 
+    W, H = 320, 240
+    drone = libardrone.ARDrone()
+    running = True
+#while running:
+#    for event in pygame.event.get():
+#        if event.type == pygame.QUIT:
+#            running = False 
+#        elif event.type == pygame.KEYUP:
+#            drone.hover()
+#        elif event.type == pygame.KEYDOWN:
+#            if event.key == pygame.K_ESCAPE:
+#                drone.reset()
+#                running = False
+#            # takeoff / land
+#            elif event.key == pygame.K_RETURN:
+#                drone.takeoff()
+#            elif event.key == pygame.K_SPACE:
+#                drone.land()
+#            # emergency
+#            elif event.key == pygame.K_BACKSPACE:
+#               drone.reset()
+#           # forward / backward
+#            elif event.key == pygame.K_w:
+#                drone.move_forward()
+#            elif event.key == pygame.K_s:
+#                drone.move_backward()
+#            # left / right
+#            elif event.key == pygame.K_a:
+#                drone.move_left()
+#            elif event.key == pygame.K_d:
+#                drone.move_right()
+#            # up / down
+#           elif event.key == pygame.K_UP:
+#               drone.move_up()
+#           elif event.key == pygame.K_DOWN:
+#              drone.move_down()
+#          # turn left / turn right
+#          elif event.key == pygame.K_LEFT:
+#              drone.turn_left()
+#          elif event.key == pygame.K_RIGHT:
+#              drone.turn_right()
+#          # speed
+    while 1==1:
+	distanceFront = setupUltrasonic(GPIO_TRIGGER_FRONT, GPIO_ECHO_FRONT)
+	distanceLeft = setupUltrasonic(GPIO_TRIGGER_LEFT, GPIO_ECHO_LEFT)
+	distanceRight = setupUltrasonic(GPIO_TRIGGER_RIGHT, GPIO_ECHO_RIGHT)
+		
+
+    	if distanceFront < 50:
+            #we would be here if we had a drone
+	    #drone.halt
+	    if (distanceLeft > 50):
+		handleObstacleLeft()
+	    elif (distanceRight > 50):
+		handleObstacleRight()
+	    else:
+		handleLandDrone()
+		#break;
+		
+    	else:
+    	    handleObstacleFront()
+	    
+	#drone.halt
+	print "drone stopping..."
+
+	print "distanceFront: %f, distanceleft: %f, distanceRight: %f" % (distanceFront, distanceLeft, distanceRight)
+# Reset GPIO settings
+    GPIO.cleanup()
+def handleLandDrone():
+	print "Drone is stopping"
+
+def handleObstacleLeft():
+	#drone.move_left()
+	print "drone moving left for 3 second..."
+	time.sleep(3)
+def handleObstacleRight():
+	print "drone moving right for 3 second..."
+	time.sleep(3)
+def handleObstacleFront():
+	print "drone moving Forward for 3 second..."
+	time.sleep(3)
+
+   
+def setupUltrasonic(TRIGGER, ECHO): 
+	# Set pins as output and input
+    	GPIO.setup(TRIGGER,GPIO.OUT)  # Trigger
+    	GPIO.setup(ECHO,GPIO.IN)      # Echo
+
+	# Set trigger to False (Low)
+    	GPIO.output(TRIGGER, False)
+
+	# Allow module to settle
+    	time.sleep(0.5)
+
+	# Send 10us pulse to trigger
+    	GPIO.output(TRIGGER, True)
+    	time.sleep(0.00001)
+    	GPIO.output(TRIGGER, False)
+    	start = time.time()
+    	while GPIO.input(ECHO)==0:
+    	    start = time.time()
+
+    	while GPIO.input(ECHO)==1:
+    	    stop = time.time()
+
+	# Calculate pulse length
+    	elapsed = stop-start
+
+	# Distance pulse travelled in that time is time
+	#	 multiplied by the speed of sound (cm/s)
+    	distance = elapsed * 34000
+
+	# That was the distance there and back so halve the value
+    	distance = distance / 2
+	return distance
+
+
+
+main() 
+
+
+
+
+
+
