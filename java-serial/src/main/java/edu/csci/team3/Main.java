@@ -1,7 +1,8 @@
 package edu.csci.team3;
 
 import gnu.io.CommPort;
-import gnu.io.CommPortIdentifier;
+//import gnu.io.CommPortIdentifier;
+import gnu.io.*
 import gnu.io.SerialPort;
 import java.io.IOException;
 import java.io.InputStream;
