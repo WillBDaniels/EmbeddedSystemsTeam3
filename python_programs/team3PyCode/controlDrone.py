@@ -112,8 +112,9 @@ def main():
 		front, left, right = getDistances()
 		distList = distanceLogic(front, left, right)
 		print ("This is the move: ", move)
-		if move == WIDTH:
+		if move == -WIDTH:
 			if (distList[0] == 1):
+				print "valid move!"
 				moveNorth(False);
 			elif(distList[1] == 1):
 				moveWest(True);
@@ -123,9 +124,9 @@ def main():
 				moveSouth(True);
 			else:
 				handleLandDrone();
-		elif move == (-WIDTH):
+		elif move == (WIDTH):
 			if (distList[3] != -999):
-				print "We meant to move backwards"
+				print "valid move!"
 				moveSouth(False);
 			elif(distList[1] == 1):
 				moveWest(True);
@@ -135,24 +136,27 @@ def main():
 				moveNorth(True);
 			else:
 				handleLandDrone();
-		elif move == 1:
+		elif move == -1:
 			if (distList[1] == 1):
-				moveNorth(False);
+				print "valid move!"
+				moveWest(False);
 			elif(distList[0] == 1):
-				moveWest(True);
+				moveNorth(True);
 			elif (distList[2] == 1):
 				moveEast(True);
 			elif (distList[3] != -999):
 				moveSouth(True);
 			else:
 				handleLandDrone();
-		elif move == (-1):
+		elif move == 1:
+			print ("distList[2] : ", distList[2])
 			if (distList[2] == 1):
-				moveNorth(False);
+				print "valid move!"
+				moveEast(False);
 			elif(distList[1] == 1):
 				moveWest(True);
 			elif (distList[0] == 1):
-				moveEast(True);
+				moveNorth(True);
 			elif (distList[3] != -999):
 				moveSouth(True);
 			else:
@@ -172,34 +176,32 @@ def getDistances():
 	return distanceFront, distanceLeft, distanceRight
 
 def distanceLogic(distanceFront, distanceLeft, distanceRight):
-	minDistance = 20
-	distList = [-1, -1, -1, -1]
-	if ((distanceFront < minDistance) and (map[currentRow - 1][currentCol] != '7')):
+	minDistance = 10
+	distList = [1, -1, -1, 1]
+	if ((distanceFront < minDistance) or (map[currentRow - 1][currentCol] != '7')):
 		distList[0] = -1
-        #we would be here if we had a drone
     #drone.halt
-    	elif ((distanceLeft > minDistance)  and (map[currentRow][currentCol - 1] != '7')):
+	print ("this is our map[currnetRow][currentCol]: ", map[currentRow][currentCol])
+    	if ((distanceLeft > minDistance)  and (map[currentRow][currentCol - 1] != '7')):
     		distList[1] = 1;
-	elif ((distanceRight > minDistance) and (map[currentRow][currentCol + 1] != '7')):
+	if ((distanceRight > minDistance) and (map[currentRow][currentCol - 1] != '7')):
 		distList[2] = 1;
-	elif ((distanceRight < minDistance) and (distanceLeft < minDistance) & (distanceFront < minDistance)):
+	if ((distanceRight < minDistance) or (distanceLeft < minDistance) & (distanceFront < minDistance)):
 		print "drone is in a location it can't navigate out of, landing..."
 		distList[3] = -999;
 	#break;
-	else:
-		distList[0] = 1;
 	return distList;
 
 def moveNorth(didGetDiverted):
 	print 'Move 1 unit North\n';
-	--currentCol
+	--currentRow
 	if (didGetDiverted):
 		map[row][col] = '2';
 		buildGraph()
 	handleObstacleFront();
 def moveSouth(didGetDiverted):
 	handleObstacleBack();
-	++currentCol
+	++currentRow
 	if (didGetDiverted):
 		map[row][col] = '2';
 		buildGraph()
@@ -207,14 +209,14 @@ def moveSouth(didGetDiverted):
 	print 'Move 1 unit south\n';
 def moveWest(didGetDiverted):
 	handleObstacleLeft()
-	--currentRow
+	--currentCol
 	if (didGetDiverted):
 		map[row][col] = '2';
 		buildGraph()
 	print 'Move 1 unit west\n';
 def moveEast(didGetDiverted):
 	handleObstacleRight();
-	++currentRow
+	++currentCol
 	if (didGetDiverted):
 		map[row][col] = '2';
 		buildGraph()
