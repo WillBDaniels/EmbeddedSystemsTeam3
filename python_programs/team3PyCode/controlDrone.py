@@ -98,6 +98,7 @@ def main():
 
 	visited, path = dijsktra(g, end );
 	print ("this is the path: " , path)
+	time.sleep(25)
     #<--------Perform diagnostics on drone, things like lateral/up/down drift, and then pre-program in compensation moves for how it tends to drift.
     # aka: if the drone tends to list to the left a little, then we should time that, and every iteration of the loop should account for this.
     # We then need to save this value into a file with a unique UUID of the drone, so that upon future runs, we don't need to keep re-calibrating the drone.
@@ -183,7 +184,7 @@ def distanceLogic(distanceFront, distanceLeft, distanceRight):
 	global currentRow
 	global currentCol
 
-	minDistance = 10
+	minDistance = 80
 	distList = [1, -1, -1, 1]
 	print ("this is the current row, currentCol, and the map at them: ", currentRow, currentCol, map[currentRow][currentCol])
 	if ((distanceFront < minDistance) or (map[currentRow + 1][currentCol] == '7')):
@@ -286,27 +287,26 @@ def buildGraph():
 	#drone.halt
 def handleLandDrone():
 	print "Drone is stopping"
-	#playAudioFile("stop.wav"); <----------- We still need this audio clip.
-
+	playAudioFile("stop.wav"); 
 
 def handleObstacleLeft():
 	#drone.move_left()
 	print "drone moving left for 3 second..."
 	playAudioFile("left.wav")
-	time.sleep(.5)
+	time.sleep(3)
 def handleObstacleRight():
 	print "drone moving right for 3 second..."
 	playAudioFile("right.wav")
-	time.sleep(.5)
+	time.sleep(3)
 def handleObstacleFront():
 	print "drone moving Forward for 3 second..."
 	playAudioFile("forward.wav")
-	time.sleep(.5)
+	time.sleep(3)
 
 def handleObstacleBack():
 	print "drone moving Backward for 3 seconds...";
-	#playAudioFile("back.wav") < ---- we still need this audio clip.
-	time.sleep(.5)
+	playAudioFile("back.wav") 
+	time.sleep(3)
    
 def setupUltrasonic(TRIGGER, ECHO):
 	# Set pins as output and input
