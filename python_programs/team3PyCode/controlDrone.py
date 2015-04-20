@@ -110,12 +110,15 @@ def handleLandDrone():
 def handleObstacleLeft():
 	#drone.move_left()
 	print "drone moving left for 3 second..."
+	playAudioFile("left.wav")
 	time.sleep(3)
 def handleObstacleRight():
 	print "drone moving right for 3 second..."
+	playAudioFile("right.wav")
 	time.sleep(3)
 def handleObstacleFront():
 	print "drone moving Forward for 3 second..."
+	playAudioFile("forward.wav")
 	time.sleep(3)
 
    
