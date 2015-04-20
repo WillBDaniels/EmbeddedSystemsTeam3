@@ -16,14 +16,14 @@ import libardrone
 from dik import Graph;
 from dik import dijsktra;
 
-mapSize =  11;
+mapSize =  101;
 # map = [[0 for col in range(mapSize)] for row in range(101)]
 map = [ [0 for col in range(mapSize)] for row in range(mapSize)]
 WIDTH = len(map) - 1
 LENGTH = WIDTH
 currentCol = 0
 currentRow = 0
-MAPFILE = "testmap.txt"
+MAPFILE = "map.txt"
 GPIO.setmode(GPIO.BCM)
 
 
@@ -94,8 +94,10 @@ def main():
 
 	fillMapFromTextFile();
 	g, start, end = buildGraph();
+	
 
 	visited, path = dijsktra(g, end );
+	print ("this is the path: " , path)
     #<--------Perform diagnostics on drone, things like lateral/up/down drift, and then pre-program in compensation moves for how it tends to drift.
     # aka: if the drone tends to list to the left a little, then we should time that, and every iteration of the loop should account for this.
     # We then need to save this value into a file with a unique UUID of the drone, so that upon future runs, we don't need to keep re-calibrating the drone.
@@ -111,8 +113,10 @@ def main():
 		move = int(path[current]) - int(current) ; # current - north = WIDTH ; current - south = -WIDTH ; current - west = 1 ; current - east = 1
 		front, left, right = getDistances()
 		distList = distanceLogic(front, left, right)
+		print ("this is distList: " , distList)
 		print ("This is the move: ", move)
 		if move == -WIDTH:
+			print ("trying to move forward, distList[0]: ", distList[0])
 			if (distList[0] == 1):
 				print "valid move!"
 				moveNorth(False);
@@ -176,15 +180,20 @@ def getDistances():
 	return distanceFront, distanceLeft, distanceRight
 
 def distanceLogic(distanceFront, distanceLeft, distanceRight):
+	global currentRow
+	global currentCol
+
 	minDistance = 10
 	distList = [1, -1, -1, 1]
-	if ((distanceFront < minDistance) or (map[currentRow - 1][currentCol] != '7')):
+	print ("this is the current row, currentCol, and the map at them: ", currentRow, currentCol, map[currentRow][currentCol])
+	if ((distanceFront < minDistance) or (map[currentRow + 1][currentCol] == '7')):
+		print ("Front not available, map value and distanceFront: ", map[currentRow+1][currentCol], distanceFront)
 		distList[0] = -1
     #drone.halt
-	print ("this is our map[currnetRow][currentCol]: ", map[currentRow][currentCol])
+	print ("this is our map[currentRow][currentCol]: ", map[currentRow][currentCol])
     	if ((distanceLeft > minDistance)  and (map[currentRow][currentCol - 1] != '7')):
     		distList[1] = 1;
-	if ((distanceRight > minDistance) and (map[currentRow][currentCol - 1] != '7')):
+	if ((distanceRight > minDistance) and (map[currentRow][currentCol + 1] != '7')):
 		distList[2] = 1;
 	if ((distanceRight < minDistance) or (distanceLeft < minDistance) & (distanceFront < minDistance)):
 		print "drone is in a location it can't navigate out of, landing..."
@@ -193,36 +202,49 @@ def distanceLogic(distanceFront, distanceLeft, distanceRight):
 	return distList;
 
 def moveNorth(didGetDiverted):
+	global currentRow
+	global currentCol
+
 	print 'Move 1 unit North\n';
-	--currentRow
+	currentRow = currentRow - 1
 	if (didGetDiverted):
 		map[row][col] = '2';
 		buildGraph()
 	handleObstacleFront();
 def moveSouth(didGetDiverted):
+	global currentRow
+	global currentCol
+
 	handleObstacleBack();
-	++currentRow
+	currentRow = currentRow +1
 	if (didGetDiverted):
 		map[row][col] = '2';
 		buildGraph()
 
 	print 'Move 1 unit south\n';
 def moveWest(didGetDiverted):
+	global currentRow
+	global currentCol
+
 	handleObstacleLeft()
-	--currentCol
+	currentCol = currentCol - 1
 	if (didGetDiverted):
 		map[row][col] = '2';
 		buildGraph()
 	print 'Move 1 unit west\n';
 def moveEast(didGetDiverted):
+	global currentRow
+	global currentCol
 	handleObstacleRight();
-	++currentCol
+	currentCol = currentCol +1
 	if (didGetDiverted):
 		map[row][col] = '2';
 		buildGraph()
 	print 'Move 1 unit east\n';
 
 def buildGraph():
+	global currentRow
+	global currentCol
 	start = '';
 	g = Graph();
 	# maps map[row][col] to graph[(row * WIDTH + col))]
@@ -271,20 +293,20 @@ def handleObstacleLeft():
 	#drone.move_left()
 	print "drone moving left for 3 second..."
 	playAudioFile("left.wav")
-	time.sleep(3)
+	time.sleep(.5)
 def handleObstacleRight():
 	print "drone moving right for 3 second..."
 	playAudioFile("right.wav")
-	time.sleep(3)
+	time.sleep(.5)
 def handleObstacleFront():
 	print "drone moving Forward for 3 second..."
 	playAudioFile("forward.wav")
-	time.sleep(3)
+	time.sleep(.5)
 
 def handleObstacleBack():
 	print "drone moving Backward for 3 seconds...";
 	#playAudioFile("back.wav") < ---- we still need this audio clip.
-	time.sleep(3)
+	time.sleep(.5)
    
 def setupUltrasonic(TRIGGER, ECHO):
 	# Set pins as output and input
