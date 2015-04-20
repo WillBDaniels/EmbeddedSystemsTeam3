@@ -16,14 +16,14 @@ import libardrone
 from dik import Graph;
 from dik import dijsktra;
 
-# map = [[0 for col in range(101)] for row in range(101)]
-mapSize =  101;
+mapSize =  11;
+# map = [[0 for col in range(mapSize)] for row in range(101)]
 map = [ [0 for col in range(mapSize)] for row in range(mapSize)]
 WIDTH = len(map) - 1
 LENGTH = WIDTH
-currentCol = 0;
-currentRow = 0;
-MAPFILE = "map.txt"
+currentCol = 0
+currentRow = 0
+MAPFILE = "testmap.txt"
 GPIO.setmode(GPIO.BCM)
 
 
@@ -43,7 +43,7 @@ def main():
 	fillMapFromTextFile()
 	print "In the main method"
 	W, H = 320, 240
-	drone = libardrone.ARDrone()
+	#drone = libardrone.ARDrone()
 	running = True
 	print "drone is running, should be working"
 #while running:
@@ -88,9 +88,9 @@ def main():
 	#This is how you get the raw data from the drone. Coolio.
 	#drone.navdata will get the actual raw data. drone.navdata
 	print "trying to takeoff"
-	drone.takeoff()
+	#drone.takeoff()
 	print "should have taken off"
-	drone.hover()
+	#drone.hover()
 
 	fillMapFromTextFile();
 	g, start, end = buildGraph();
@@ -101,6 +101,7 @@ def main():
     # We then need to save this value into a file with a unique UUID of the drone, so that upon future runs, we don't need to keep re-calibrating the drone.
     # the calibration should skip if the ID already exists.
 	#drone.reset()
+	current = start;
 	while 1==1:
 		#figure out where to move
 		if current == end:
@@ -108,53 +109,56 @@ def main():
 			print 'Target found\n';
 			break
 		move = int(path[current]) - int(current) ; # current - north = WIDTH ; current - south = -WIDTH ; current - west = 1 ; current - east = 1
-		distList = distanceLogic(getDistances())
+		front, left, right = getDistances()
+		distList = distanceLogic(front, left, right)
+		print ("This is the move: ", move)
 		if move == WIDTH:
 			if (distList[0] == 1):
-				moveNorth(false);
+				moveNorth(False);
 			elif(distList[1] == 1):
-				moveWest(true);
+				moveWest(True);
 			elif (distList[2] == 1):
-				moveEast(true);
-			elif (distlist[3] != -999):
-				moveSouth(true);
+				moveEast(True);
+			elif (distList[3] != -999):
+				moveSouth(True);
 			else:
 				handleLandDrone();
 		elif move == (-WIDTH):
 			if (distList[3] != -999):
-				moveSouth(false);
+				print "We meant to move backwards"
+				moveSouth(False);
 			elif(distList[1] == 1):
-				moveWest(true);
+				moveWest(True);
 			elif (distList[2] == 1):
-				moveEast(true);
-			elif (distlist[0] == 1):
-				moveNorth(true);
+				moveEast(True);
+			elif (distList[0] == 1):
+				moveNorth(True);
 			else:
 				handleLandDrone();
 		elif move == 1:
 			if (distList[1] == 1):
-				moveNorth(false);
+				moveNorth(False);
 			elif(distList[0] == 1):
-				moveWest(true);
+				moveWest(True);
 			elif (distList[2] == 1):
-				moveEast(true);
-			elif (distlist[3] != -999):
-				moveSouth(true);
+				moveEast(True);
+			elif (distList[3] != -999):
+				moveSouth(True);
 			else:
 				handleLandDrone();
 		elif move == (-1):
 			if (distList[2] == 1):
-				moveNorth(false);
+				moveNorth(False);
 			elif(distList[1] == 1):
-				moveWest(true);
+				moveWest(True);
 			elif (distList[0] == 1):
-				moveEast(true);
-			elif (distlist[3] != -999):
-				moveSouth(true);
+				moveEast(True);
+			elif (distList[3] != -999):
+				moveSouth(True);
 			else:
 				handleLandDrone();
 		current = path[current];
-		drone.halt()
+		#drone.halt()
 # Reset GPIO settings
 	GPIO.cleanup()
 
@@ -164,20 +168,21 @@ def getDistances():
 	distanceFront = setupUltrasonic(GPIO_TRIGGER_FRONT, GPIO_ECHO_FRONT)
 	distanceLeft = setupUltrasonic(GPIO_TRIGGER_LEFT, GPIO_ECHO_LEFT)
 	distanceRight = setupUltrasonic(GPIO_TRIGGER_RIGHT, GPIO_ECHO_RIGHT)
+	print ("DistanceFront: %f Distanceleft: %f DistanceRight: %f", distanceFront, distanceLeft, distanceRight)
 	return distanceFront, distanceLeft, distanceRight
 
-def distanceLogic(distFront, distLeft, distRight):
-	minDistance = 75
-	distList = [-1, -1, -1]
-	if ((distanceFront < minDistance) && (map[currentRow - 1][currnentCol] != 7)):
+def distanceLogic(distanceFront, distanceLeft, distanceRight):
+	minDistance = 20
+	distList = [-1, -1, -1, -1]
+	if ((distanceFront < minDistance) and (map[currentRow - 1][currentCol] != '7')):
 		distList[0] = -1
-            #we would be here if we had a drone
+        #we would be here if we had a drone
     #drone.halt
-    elif ((distanceLeft > minDistance)  && (map[currentRow][currnentCol - 1] != 7)):
-    	distList[1] = 1;
-	elif ((distanceRight > minDistance) && (map[currentRow][currnentCol + 1] != 7)):
+    	elif ((distanceLeft > minDistance)  and (map[currentRow][currentCol - 1] != '7')):
+    		distList[1] = 1;
+	elif ((distanceRight > minDistance) and (map[currentRow][currentCol + 1] != '7')):
 		distList[2] = 1;
-	elif ((distanceRight < minDistance) & (distanceLeft < minDistance) & (distanceFront < minDistance)):
+	elif ((distanceRight < minDistance) and (distanceLeft < minDistance) & (distanceFront < minDistance)):
 		print "drone is in a location it can't navigate out of, landing..."
 		distList[3] = -999;
 	#break;
@@ -187,31 +192,31 @@ def distanceLogic(distFront, distLeft, distRight):
 
 def moveNorth(didGetDiverted):
 	print 'Move 1 unit North\n';
-	currentCol -= 1
+	--currentCol
 	if (didGetDiverted):
-		map[row][col] = 2;
+		map[row][col] = '2';
 		buildGraph()
 	handleObstacleFront();
 def moveSouth(didGetDiverted):
 	handleObstacleBack();
-	currentCol += 1
+	++currentCol
 	if (didGetDiverted):
-		map[row][col] = 2;
+		map[row][col] = '2';
 		buildGraph()
 
 	print 'Move 1 unit south\n';
 def moveWest(didGetDiverted):
 	handleObstacleLeft()
-	currentRow -= 1
+	--currentRow
 	if (didGetDiverted):
-		map[row][col] = 2;
+		map[row][col] = '2';
 		buildGraph()
 	print 'Move 1 unit west\n';
 def moveEast(didGetDiverted):
 	handleObstacleRight();
-	currentRow += 1
+	++currentRow
 	if (didGetDiverted):
-		map[row][col] = 2;
+		map[row][col] = '2';
 		buildGraph()
 	print 'Move 1 unit east\n';
 
@@ -315,7 +320,7 @@ def setupUltrasonic(TRIGGER, ECHO):
 
 
 def playAudioFile(audioFileName):
-	file = audioFilename
+	file = audioFileName
 	pygame.init()
 	pygame.mixer.init(48000, -16, 1, 1024)
 	pygame.mixer.music.load(file)
