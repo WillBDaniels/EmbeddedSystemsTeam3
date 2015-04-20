@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import time, wave, pymedia.audio.sound as sound
+import pygame, time
 
 
 map = [[0 for col in range(101)] for row in range(101)]
@@ -23,14 +23,13 @@ def fillMapFromTextFile():
 
 
 def testPlayAudioFile():
-	f= wave.open( 'forward.wav', 'rb' )
-	sampleRate= f.getframerate()
-	channels= f.getnchannels()
-	format= sound.AFMT_S16_LE
-	snd= sound.Output( sampleRate, channels, format )
-	s= f.readframes( 300000 )
-	snd.play( s )
-	while snd.isPlaying(): time.sleep( 0.005 )
+	file = 'forward.wav'
+	pygame.init()
+	pygame.mixer.init(48000, -16, 1, 1024)
+	pygame.mixer.music.load(file)
+	pygame.mixer.music.play()
+	while pygame.mixer.music.get_busy():
+		continue
 
 
 def main():

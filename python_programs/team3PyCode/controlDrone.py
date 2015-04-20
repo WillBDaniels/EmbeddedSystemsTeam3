@@ -5,7 +5,7 @@
 import time
 import RPi.GPIO as GPIO
 
-import wave, pymedia.audio.sound as sound
+import pygame
 
 import libardrone
 
@@ -155,14 +155,13 @@ def setupUltrasonic(TRIGGER, ECHO):
 
 
 def playAudioFile(audioFileName):
-	f= wave.open( audioFileName, 'rb' )
-	sampleRate= f.getframerate()
-	channels= f.getnchannels()
-	format= sound.AFMT_S16_LE
-	snd= sound.Output( sampleRate, channels, format )
-	s= f.readframes( 300000 )
-	snd.play( s )
-	while snd.isPlaying(): time.sleep( 0.005 )
+	file = audioFilename
+	pygame.init()
+	pygame.mixer.init(48000, -16, 1, 1024)
+	pygame.mixer.music.load(file)
+	pygame.mixer.music.play()
+	while pygame.mixer.music.get_busy():
+		continue
 
 def fillMapFromTextFile():
 	mapFileLocation = "map.txt";
