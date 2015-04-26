@@ -28,20 +28,22 @@ GPIO_TRIGGER_RIGHT = 22
 GPIO_ECHO_RIGHT = 23
 GPIO_TRIGGER_LEFT = 6
 GPIO_ECHO_LEFT = 12
+map = [[0 for col in range(101)] for row in range(101)]
 
 print "Ultrasonic Measurement"
 
 
 def main():
-    print "In the main method" 
-    W, H = 320, 240
-    drone = libardrone.ARDrone()
-    running = True
-    print "drone is running, should be working"
+	fillMapFromTextFile()
+	print "In the main method"
+	W, H = 320, 240
+	drone = libardrone.ARDrone()
+	running = True
+	print "drone is running, should be working"
 #while running:
 #    for event in pygame.event.get():
 #        if event.type == pygame.QUIT:
-#            running = False 
+#            running = False
 #        elif event.type == pygame.KEYUP:
 #            drone.hover()
 #        elif event.type == pygame.KEYDOWN:
@@ -77,36 +79,36 @@ def main():
 #          elif event.key == pygame.K_RIGHT:
 #              drone.turn_right()
 #          # speed
-    print "trying to takeoff"
-    drone.takeoff()
-    print "should have taken off"
-    drone.hover()
-    #drone.reset()
-    while 1==1:
-	distanceFront = setupUltrasonic(GPIO_TRIGGER_FRONT, GPIO_ECHO_FRONT)
-	distanceLeft = setupUltrasonic(GPIO_TRIGGER_LEFT, GPIO_ECHO_LEFT)
-	distanceRight = setupUltrasonic(GPIO_TRIGGER_RIGHT, GPIO_ECHO_RIGHT)
+	print "trying to takeoff"
+	drone.takeoff()
+	print "should have taken off"
+	drone.hover()
+	#drone.reset()
+	while 1==1:
+		distanceFront = setupUltrasonic(GPIO_TRIGGER_FRONT, GPIO_ECHO_FRONT)
+		distanceLeft = setupUltrasonic(GPIO_TRIGGER_LEFT, GPIO_ECHO_LEFT)
+		distanceRight = setupUltrasonic(GPIO_TRIGGER_RIGHT, GPIO_ECHO_RIGHT)
 		
 
-    	if distanceFront < 50:
+		if distanceFront < 50:
             #we would be here if we had a drone
 	    #drone.halt
 	    if (distanceLeft > 50):
-		handleObstacleLeft()
-	    elif (distanceRight > 50):
-		handleObstacleRight()
-	    elif ((distanceRight < 50) & (distanceLeft < 50) & (distanceFront < 50)): 
-		print "drone is in a location it can't navigate out of, landing..."
-		handleLandDrone()
-		#break;		
-    	else:
-    	    handleObstacleFront()
+	    	handleObstacleLeft()
+		elif (distanceRight > 50):
+			handleObstacleRight()
+		elif ((distanceRight < 50) & (distanceLeft < 50) & (distanceFront < 50)):
+			print "drone is in a location it can't navigate out of, landing..."
+			handleLandDrone()
+		#break;
+		else:
+			handleObstacleFront()
 	    
 	#drone.halt
 
 	print "distanceFront: %f, distanceleft: %f, distanceRight: %f" % (distanceFront, distanceLeft, distanceRight)
 # Reset GPIO settings
-    GPIO.cleanup()
+	GPIO.cleanup()
 def handleLandDrone():
 	print "Drone is stopping"
 
@@ -123,42 +125,55 @@ def handleObstacleFront():
 	time.sleep(3)
 
    
-def setupUltrasonic(TRIGGER, ECHO): 
+def setupUltrasonic(TRIGGER, ECHO):
 	# Set pins as output and input
-    	GPIO.setup(TRIGGER,GPIO.OUT)  # Trigger
-    	GPIO.setup(ECHO,GPIO.IN)      # Echo
+	GPIO.setup(TRIGGER,GPIO.OUT)  # Trigger
+	GPIO.setup(ECHO,GPIO.IN)      # Echo
 
 	# Set trigger to False (Low)
-    	GPIO.output(TRIGGER, False)
+	GPIO.output(TRIGGER, False)
 
 	# Allow module to settle
-    	time.sleep(0.5)
+	time.sleep(0.5)
 
 	# Send 10us pulse to trigger
-    	GPIO.output(TRIGGER, True)
-    	time.sleep(0.00001)
-    	GPIO.output(TRIGGER, False)
-    	start = time.time()
-    	while GPIO.input(ECHO)==0:
-    	    start = time.time()
+	GPIO.output(TRIGGER, True)
+	time.sleep(0.00001)
+	GPIO.output(TRIGGER, False)
+	start = time.time()
+	while GPIO.input(ECHO)==0:
+		start = time.time()
 
-    	while GPIO.input(ECHO)==1:
-    	    stop = time.time()
+	while GPIO.input(ECHO)==1:
+		stop = time.time()
 
 	# Calculate pulse length
-    	elapsed = stop-start
+		elapsed = stop-start
 
 	# Distance pulse travelled in that time is time
 	#	 multiplied by the speed of sound (cm/s)
-    	distance = elapsed * 34000
+		distance = elapsed * 34000
 
 	# That was the distance there and back so halve the value
-    	distance = distance / 2
+		distance = distance / 2
+
 	return distance
 
 
+def fillMapFromTextFile():
+	mapFileLocation = "map.txt";
+	i = 0;
+	y = 0;
+	with open(mapFileLocation) as f:
+		for line in f:
+			list = line.split(',');
+			for item in list:
+				map[i][y] = item;
+				i=i+1;
+			y=y+1;
+			i = 0;
 
-main() 
+main()
 
 
 
