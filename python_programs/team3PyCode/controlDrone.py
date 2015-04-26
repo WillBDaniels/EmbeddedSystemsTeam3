@@ -1,17 +1,11 @@
 #!/usr/bin/python
-#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#|R|a|s|p|b|e|r|r|y|P|i|-|S|p|y|.|c|o|.|u|k|
-#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#
-# ultrasonic_1.py
-# Measure distance using an ultrasonic module
-#
-# Author : Matt Hawkins
-# Date   : 09/01/2013
+
 
 # Import required Python libraries
 import time
 import RPi.GPIO as GPIO
+
+import wave, pymedia.audio.sound as sound
 
 import libardrone
 
@@ -159,6 +153,16 @@ def setupUltrasonic(TRIGGER, ECHO):
 
 	return distance
 
+
+def playAudioFile(audioFileName):
+	f= wave.open( audioFileName, 'rb' )
+	sampleRate= f.getframerate()
+	channels= f.getnchannels()
+	format= sound.AFMT_S16_LE
+	snd= sound.Output( sampleRate, channels, format )
+	s= f.readframes( 300000 )
+	snd.play( s )
+	while snd.isPlaying(): time.sleep( 0.005 )
 
 def fillMapFromTextFile():
 	mapFileLocation = "map.txt";
