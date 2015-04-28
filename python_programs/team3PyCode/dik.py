@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 class Graph:
   def __init__(self):
     self.nodes = set()
@@ -33,9 +35,8 @@ def dijsktra(graph, initial):
  
     nodes.remove(min_node)
     current_weight = visited[min_node]
- 
     for edge in graph.edges[min_node]:
-      weight = current_weight + graph.distance[(min_node, edge)]
+      weight = current_weight + graph.distances[(min_node, edge)]
       if edge not in visited or weight < visited[edge]:
         visited[edge] = weight
         path[edge] = min_node
