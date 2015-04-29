@@ -174,7 +174,7 @@ def fillMapFromTextFile():
 		for line in f:
 			list = line.split(',');
 			for item in list:
-				map[i][y] = item;
+				map[y][i] = item;
 				i=i+1;
 			y=y+1;
 			i = 0;
