@@ -111,46 +111,46 @@ def main():
 		distList = distanceLogic(getDistances())
 		if move == WIDTH:
 			if (distList[0] == 1):
-				moveNorth();
+				moveNorth(false);
 			elif(distList[1] == 1):
-				moveWest();
+				moveWest(true);
 			elif (distList[2] == 1):
-				moveEast();
+				moveEast(true);
 			elif (distlist[3] != -999):
-				moveSouth();
+				moveSouth(true);
 			else:
 				handleLandDrone();
 		elif move == (-WIDTH):
 			if (distList[3] != -999):
-				moveSouth();
+				moveSouth(false);
 			elif(distList[1] == 1):
-				moveWest();
+				moveWest(true);
 			elif (distList[2] == 1):
-				moveEast();
+				moveEast(true);
 			elif (distlist[0] == 1):
-				moveNorth();
+				moveNorth(true);
 			else:
 				handleLandDrone();
 		elif move == 1:
 			if (distList[1] == 1):
-				moveNorth();
+				moveNorth(false);
 			elif(distList[0] == 1):
-				moveWest();
+				moveWest(true);
 			elif (distList[2] == 1):
-				moveEast();
+				moveEast(true);
 			elif (distlist[3] != -999):
-				moveSouth();
+				moveSouth(true);
 			else:
 				handleLandDrone();
 		elif move == (-1):
 			if (distList[2] == 1):
-				moveNorth();
+				moveNorth(false);
 			elif(distList[1] == 1):
-				moveWest();
+				moveWest(true);
 			elif (distList[0] == 1):
-				moveEast();
+				moveEast(true);
 			elif (distlist[3] != -999):
-				moveSouth();
+				moveSouth(true);
 			else:
 				handleLandDrone();
 		current = path[current];
@@ -185,21 +185,34 @@ def distanceLogic(distFront, distLeft, distRight):
 		distList[0] = 1;
 	return distList;
 
-def moveNorth():
+def moveNorth(didGetDiverted):
 	print 'Move 1 unit North\n';
 	currentCol -= 1
+	if (didGetDiverted):
+		map[row][col] = 2;
+		buildGraph()
 	handleObstacleFront();
-def moveSouth():
+def moveSouth(didGetDiverted):
 	handleObstacleBack();
 	currentCol += 1
+	if (didGetDiverted):
+		map[row][col] = 2;
+		buildGraph()
+
 	print 'Move 1 unit south\n';
-def moveWest():
+def moveWest(didGetDiverted):
 	handleObstacleLeft()
 	currentRow -= 1
+	if (didGetDiverted):
+		map[row][col] = 2;
+		buildGraph()
 	print 'Move 1 unit west\n';
-def moveEast():
+def moveEast(didGetDiverted):
 	handleObstacleRight();
 	currentRow += 1
+	if (didGetDiverted):
+		map[row][col] = 2;
+		buildGraph()
 	print 'Move 1 unit east\n';
 
 def buildGraph():
@@ -215,7 +228,7 @@ def buildGraph():
 				print 'found start found at row col: ', (row, col)
 				print 'found start at : %d' %(row * WIDTH + col)
 				#reset the start value so that we can re-assign the start later.
-				map[row][col] = '2';
+				map[row][col] = '0';
 
 			if map[row][col] == '3':
 				end = str(row * WIDTH + col);
@@ -244,6 +257,7 @@ def buildGraph():
 	#drone.halt
 def handleLandDrone():
 	print "Drone is stopping"
+	#playAudioFile("stop.wav"); <----------- We still need this audio clip.
 
 
 def handleObstacleLeft():
