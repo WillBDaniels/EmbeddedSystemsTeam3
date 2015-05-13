@@ -25,6 +25,7 @@ currentCol = 0
 currentRow = 0
 MAPFILE = "map.txt"
 GPIO.setmode(GPIO.BCM)
+#calibrationList = [1.0, 1.0, 1.0]
 
 
 
@@ -99,7 +100,10 @@ def main():
 	visited, path = dijsktra(g, end );
 	print ("this is the path: " , path)
 	time.sleep(25)
-    #<--------Perform diagnostics on drone, things like lateral/up/down drift, and then pre-program in compensation moves for how it tends to drift.
+	
+	#print "Calibrating..."
+	#calibrationList = calibrateMovement();
+    #^--------Perform diagnostics on drone, things like lateral/up/down drift, and then pre-program in compensation moves for how it tends to drift.
     # aka: if the drone tends to list to the left a little, then we should time that, and every iteration of the loop should account for this.
     # We then need to save this value into a file with a unique UUID of the drone, so that upon future runs, we don't need to keep re-calibrating the drone.
     # the calibration should skip if the ID already exists.
@@ -201,6 +205,42 @@ def distanceLogic(distanceFront, distanceLeft, distanceRight):
 		distList[3] = -999;
 	#break;
 	return distList;
+	
+#def calibrateMovement():
+#	x = 1.0;
+#	y = 1.0;
+#	z = 1.0;		
+#	
+#	xVariance = 99;
+#	yVariance = 99;
+#	zVariance = 0;
+#	
+#		oldDistanceFront = setupUltrasonic(GPIO_TRIGGER_FRONT, GPIO_ECHO_FRONT)
+#		oldDistanceLeft = setupUltrasonic(GPIO_TRIGGER_LEFT, GPIO_ECHO_LEFT)
+#		oldDistanceRight = setupUltrasonic(GPIO_TRIGGER_RIGHT, GPIO_ECHO_RIGHT)
+#
+#	while (xVariance > 10) or (xVariance < -10) or (yVariance > 10) or (yVariance < -10):
+#		time.sleep(5)
+#		distanceFront = setupUltrasonic(GPIO_TRIGGER_FRONT, GPIO_ECHO_FRONT);
+#		distanceLeft = setupUltrasonic(GPIO_TRIGGER_LEFT, GPIO_ECHO_LEFT);
+#		distanceRight = setupUltrasonic(GPIO_TRIGGER_RIGHT, GPIO_ECHO_RIGHT);
+#		xVariance = distanceLeft - oldDistanceLeft;
+#		yVariance = distanceFront - oldDistanceFront;
+#		if(xVariance > 10):
+#			x += 0.1;
+#		if(xVariance < -10):
+#			x -= 0.1;
+#		if(yVariance > 10:
+#			y += 0.1;
+#		if(yVariance < -10):
+#			y -= 0.1;
+#		
+#		oldDistanceFront = distanceFront;
+#		oldDistanceLeft = distanceLeft;
+#		oldDistanceRight = distanceRight;
+#
+#	tempCalibrationList = [x, y, z]
+#	return tempCalibrationList;
 
 def moveNorth(didGetDiverted):
 	global currentRow
